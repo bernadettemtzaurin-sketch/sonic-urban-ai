@@ -55,12 +55,104 @@ function renderGps() {
   renderMods();
 }
 function renderLog() {
-  $('count').textContent = 'Eventos: ' + String(store.list.length).padStart(2, '0');
+  $('count').textContent =
+    'Eventos: ' + String(store.list.length).padStart(2, '0');
+
   $('log').innerHTML = store.list.slice(0, 30).map(e => {
-    const T = EVENT_TYPES[e.type], t = new Date(e.timestamp).toLocaleTimeString('es-MX');
-    const g = e.gps ? `📍 ${e.gps.latitude.toFixed(5)}, ${e.gps.longitude.toFixed(5)}` : 'GPS NO DISPONIBLE';
-    return `<li>${e.evidence ? `<img src="${e.evidence}" alt="evidencia">` : '<img alt="">'}<div><div class="t">${T.icon} ${e.label}${e.status === 'experimental' ? '<span class="tag">EXPERIMENTAL</span>' : ''}${e.demo ? '<span class="tag">DEMO</span>' : ''}</div>
-    ${e.ocrText ? `<div class="m">OCR: "${e.ocrText.replace(/\s+/g, ' ').slice(0, 60).replace(/</g, '&lt;')}"</div>` : ''}<div class="m">${Math.round(e.confidence * 100)}% · ${t}</div><div class="m">${g}</div></div></li>`;
+
+    const T = EVENT_TYPES[e.type];
+
+    const t =
+      new Date(e.timestamp).toLocaleTimeString('es-MX');
+
+    const g = e.gps
+      ? `📍 ${e.gps.latitude.toFixed(5)}, ${e.gps.longitude.toFixed(5)}`
+      : 'GPS NO DISPONIBLE';
+
+    // Datos estructurados de propiedad
+    const p = e.property;
+
+    const propertyInfo = p
+      ? `
+        <div class="property-data">
+
+          ${p.operation
+            ? `<div class="m">🔑 <strong>${p.operation}</strong></div>`
+            : ''}
+
+          ${p.propertyType
+            ? `<div class="m">🏠 ${p.propertyType}</div>`
+            : ''}
+
+          ${p.phone
+            ? `<div class="m">📞 ${p.phone}</div>`
+            : ''}
+
+          ${p.price
+            ? `<div class="m">💰 ${p.price}</div>`
+            : ''}
+
+          ${p.area
+            ? `<div class="m">📐 ${p.area}</div>`
+            : ''}
+
+        </div>
+      `
+      : '';
+
+    return `
+      <li>
+        ${
+          e.evidence
+            ? `<img src="${e.evidence}" alt="evidencia">`
+            : '<img alt="">'
+        }
+
+        <div>
+
+          <div class="t">
+            ${T.icon} ${e.label}
+
+            ${
+              e.status === 'experimental'
+                ? '<span class="tag">EXPERIMENTAL</span>'
+                : ''
+            }
+
+            ${
+              e.demo
+                ? '<span class="tag">DEMO</span>'
+                : ''
+            }
+          </div>
+
+          ${propertyInfo}
+
+          ${
+            e.ocrText
+              ? `
+                <div class="m">
+                  OCR:
+                  "${e.ocrText
+                    .replace(/\s+/g, ' ')
+                    .slice(0, 120)
+                    .replace(/</g, '&lt;')}"
+                </div>
+              `
+              : ''
+          }
+
+          <div class="m">
+            ${Math.round(e.confidence * 100)}% · ${t}
+          </div>
+
+          <div class="m">
+            ${g}
+          </div>
+
+        </div>
+      </li>
+    `;
   }).join('');
 }
 function draw() {
